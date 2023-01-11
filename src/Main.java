@@ -30,6 +30,18 @@ public class Main{
 
             // Lecture des commandes du client
             String str = inFromClient.readLine();
+            System.out.println(str);
+            
+            // Envoi de la réponse au client
+            outToClient.writeBytes("331 User name ok, need password\n");
+
+            // Lecture des commandes du client
+            str = inFromClient.readLine();
+            System.out.println(str);
+
+            // Envoi de la réponse au client
+            outToClient.writeBytes("230 User logged in\n");
+
         }
 
     }

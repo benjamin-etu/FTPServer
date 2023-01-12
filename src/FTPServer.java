@@ -35,7 +35,7 @@ public class FTPServer{
     /*
      * Receive clients connections 
      */
-    private void receiveConnections() throws IOException{
+    public void receiveConnections() throws IOException{
         while (true) {
             this.clientSocket = serverSocket.accept();
             System.out.println(clientSocket.toString());
@@ -45,7 +45,7 @@ public class FTPServer{
             this.outToClient = new DataOutputStream(clientSocket.getOutputStream());
 
             // Envoi de la réponse au client
-            outToClient.writeBytes("220 Server ready\n");
+            writeToClient("220 Server ready\n");
 
             this.readCommands();
         }
@@ -54,34 +54,76 @@ public class FTPServer{
     /*
      * Read ftp commands and use the correct behavior 
      */
-    private void readCommands() throws IOException{
-        boolean quitClient = false;
-        while (quitClient == false){
+    public void readCommands() throws IOException{
+        boolean stop = false;
+        while (stop == false){
             String command = inFromClient.readLine();
             System.out.println(command);
 
             if (command.startsWith("USER")){
-                outToClient.writeBytes("331 User name ok, need password\n");
+                this.handleUser();
             }
             else if (command.startsWith("PASS")){
-                outToClient.writeBytes("230 User logged in\n");
+                this.handlePass();
             }
             else if (command.startsWith("QUIT")){
-                outToClient.writeBytes("Server closes all connections\n");
-                clientSocket.close();
-                quitClient = true;
+                stop = this.handleQuit();
             }
             else if (command.startsWith("SYST")){
-                outToClient.writeBytes("500\n");
+                this.handleSyst();
             }
             else if(command.startsWith("FEAT")){
-                outToClient.writeBytes("211\n");
+                this.handleFeat();
             }
             else if(command.startsWith("EPSV")){
-                outToClient.writeBytes(
-                "229 Entering Extended Passive Mode (|||" + clientSocket.getPort() + "|)\n"
-                );
+                this.handleEpsv();
             }
+        }
+    }
+
+    public void handleUser(){
+        writeToClient("331 User name ok, need password\n");
+    }
+
+    public void handlePass(){
+        writeToClient("230 User logged in\n");
+    }
+
+    /*
+     * Behavior for QUIT Command.
+     * Return true if no error on close socket.
+     * False otherwise.
+     */
+    public boolean handleQuit(){
+        try{
+            writeToClient("Server closes all connections\n");
+            this.clientSocket.close();
+            return true;
+        }catch(IOException e){
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public void handleSyst(){
+        writeToClient("500\n");
+    }
+
+    public void handleFeat(){
+        writeToClient("211\n");
+    }
+
+    public void handleEpsv(){
+        writeToClient(
+            "229 Entering Extended Passive Mode (|||" + clientSocket.getPort() + "|)\n"
+        );
+    }
+
+    public void writeToClient(String bytes){
+        try{
+            outToClient.writeBytes(bytes);
+        }catch (IOException e){
+            e.printStackTrace();
         }
     }
 

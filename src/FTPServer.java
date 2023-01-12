@@ -40,10 +40,13 @@ public class FTPServer{
                     outToClient.writeBytes("230 User logged in\n");
                 }
                 else if (command.startsWith("QUIT")){
-                    outToClient.writeBytes("Server closes all connections.\n"); 
-                    s.close();
-                }else{
-                    outToClient.writeBytes("Commande inconnue");
+                    outToClient.writeBytes("Server closes all connections\n"); 
+                    clientSocket.close();
+                    break;
+                }else if (command.startsWith("SYST")){
+                    outToClient.writeBytes("500\n");
+                }else if(command.startsWith("FEAT")){
+                    outToClient.writeBytes("211\n");
                 }
             }
         }

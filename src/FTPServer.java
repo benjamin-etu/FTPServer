@@ -9,9 +9,14 @@ import java.net.Socket;
 
 public class FTPServer{
 
-    public static void main(String[] args) throws IOException{
-    
-        ServerSocket s = new ServerSocket(4242);
+    private int port;
+
+    public FTPServer(int port){
+        this.port = port;
+    }
+
+    public void run() throws IOException{
+        ServerSocket s = new ServerSocket(this.port);
         System.out.println("FTP Server listening");
 
         // Boucle infinie pour accepter les connexions clientes

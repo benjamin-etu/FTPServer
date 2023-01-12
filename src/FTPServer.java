@@ -7,11 +7,11 @@ import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-public class Main{
+public class FTPServer{
 
     public static void main(String[] args) throws IOException{
     
-        ServerSocket s = new ServerSocket( 4242);
+        ServerSocket s = new ServerSocket(4242);
         System.out.println("FTP Server listening");
 
         // Boucle infinie pour accepter les connexions clientes
@@ -27,23 +27,25 @@ public class Main{
 
             // Envoi de la réponse au client
             outToClient.writeBytes("220 Server ready\n");
-
-            // Lecture des commandes du client
-            String str = inFromClient.readLine();
-            System.out.println(str);
             
-            // Envoi de la réponse au client
-            outToClient.writeBytes("331 User name ok, need password\n");
+            /* Lecture des commandes */
+            while (true){
+                String command = inFromClient.readLine();
+                System.out.println(command);
 
-            // Lecture des commandes du client
-            str = inFromClient.readLine();
-            System.out.println(str);
-
-            // Envoi de la réponse au client
-            outToClient.writeBytes("230 User logged in\n");
-
+                if (command.startsWith("USER")){
+                    outToClient.writeBytes("331 User name ok, need password\n");
+                }
+                else if (command.startsWith("PASS")){
+                    outToClient.writeBytes("230 User logged in\n");
+                }
+                else if (command.startsWith("QUIT")){
+                    outToClient.writeBytes("Server closes all connections.\n"); 
+                    s.close();
+                }else{
+                    outToClient.writeBytes("Commande inconnue");
+                }
+            }
         }
-
     }
-
 }

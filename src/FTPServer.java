@@ -77,6 +77,11 @@ public class FTPServer{
             else if(command.startsWith("FEAT")){
                 outToClient.writeBytes("211\n");
             }
+            else if(command.startsWith("EPSV")){
+                outToClient.writeBytes(
+                "229 Entering Extended Passive Mode (|||" + clientSocket.getPort() + "|)\n"
+                );
+            }
         }
     }
 

@@ -12,6 +12,8 @@ public class FTPServer{
     private Socket clientSocket;
     private BufferedReader inFromClient;
     private DataOutputStream outToClient;
+    private final String USERNAME = "ben";
+    private final String PASSWORD = "ben";
 
     public FTPServer(int port) throws IOException{
         this.port = port;
@@ -36,7 +38,7 @@ public class FTPServer{
     private void receiveConnections() throws IOException{
         while (true) {
             this.clientSocket = serverSocket.accept();
-            System.out.println("Connexion cliente reçue");
+            System.out.println(clientSocket.toString());
 
             // Création des flux d'entrée et sortie
             this.inFromClient = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
@@ -53,7 +55,8 @@ public class FTPServer{
      * Read ftp commands and use the correct behavior 
      */
     private void readCommands() throws IOException{
-        while (true){
+        boolean quitClient = false;
+        while (quitClient == false){
             String command = inFromClient.readLine();
             System.out.println(command);
 
@@ -64,8 +67,9 @@ public class FTPServer{
                 outToClient.writeBytes("230 User logged in\n");
             }
             else if (command.startsWith("QUIT")){
-                outToClient.writeBytes("Server closes all connections\n"); 
+                outToClient.writeBytes("Server closes all connections\n");
                 clientSocket.close();
+                quitClient = true;
             }
             else if (command.startsWith("SYST")){
                 outToClient.writeBytes("500\n");

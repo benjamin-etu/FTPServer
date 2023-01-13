@@ -60,12 +60,21 @@ public class FTPServer{
             String command = inFromClient.readLine();
             System.out.println(command);
 
+            //phase de login
             if (command.startsWith("USER")){
                 this.handleUser();
+                String username = command.split(" ")[1];
+                command = inFromClient.readLine();
+                if (command.startsWith("PASS")){
+                    String password = command.split(" ")[1];
+                    if (username.equals(this.USERNAME) && password.equals(this.PASSWORD)){
+                        this.handlePass();
+                    }else{
+                        writeToClient("ERROR login\n");
+                    }
+                }
             }
-            else if (command.startsWith("PASS")){
-                this.handlePass();
-            }
+    
             else if (command.startsWith("QUIT")){
                 stop = this.handleQuit();
             }
@@ -78,7 +87,14 @@ public class FTPServer{
             else if(command.startsWith("EPSV")){
                 this.handleEpsv();
             }
+            else if(command.startsWith("OPTS")){
+                this.handleOpts();
+            }
         }
+    }
+
+    public void handleOpts(){
+        writeToClient("200 SP opts good\n");
     }
 
     public void handleUser(){

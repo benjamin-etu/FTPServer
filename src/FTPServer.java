@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.Inet6Address;
+import java.net.InetAddress;
 
 public class FTPServer{
 
@@ -47,26 +49,36 @@ public class FTPServer{
             // Envoi de la réponse au client
             writeToClient("220 Server ready\n");
 
-            this.readCommands();
+            this.handleCommand();
         }
     }
 
     /*
-     * Read ftp commands and use the correct behavior 
+     * Read a command and return a list of two elements.
+     * First element is the command name. Second element is the argument given with this command.
      */
-    public void readCommands() throws IOException{
+    public String[] readCommand() throws IOException{
+        String command = inFromClient.readLine();
+        System.out.println(command);
+        return command.split(" ");
+    }
+
+    /*
+     * Handles ftp commands
+     */
+    public void handleCommand() throws IOException{
         boolean stop = false;
         while (stop == false){
-            String command = inFromClient.readLine();
-            System.out.println(command);
-
+            String[] command = this.readCommand();
+            String commandName = command[0];
             //phase de login
-            if (command.startsWith("USER")){
+            if (commandName.startsWith("USER")){
                 this.handleUser();
-                String username = command.split(" ")[1];
-                command = inFromClient.readLine();
-                if (command.startsWith("PASS")){
-                    String password = command.split(" ")[1];
+                String username = command[1];
+                command = this.readCommand();
+                commandName = command[0];
+                String password = command[1];
+                if (commandName.startsWith("PASS")){
                     if (username.equals(this.USERNAME) && password.equals(this.PASSWORD)){
                         this.handlePass();
                     }else{
@@ -75,24 +87,37 @@ public class FTPServer{
                 }
             }
     
-            else if (command.startsWith("QUIT")){
+            else if (commandName.startsWith("QUIT")){
                 stop = this.handleQuit();
             }
-            else if (command.startsWith("SYST")){
+            else if (commandName.startsWith("SYST")){
                 this.handleSyst();
             }
-            else if(command.startsWith("FEAT")){
+            else if(commandName.startsWith("FEAT")){
                 this.handleFeat();
             }
-            else if(command.startsWith("EPSV")){
+            else if(commandName.startsWith("EPSV")){
                 this.handleEpsv();
             }
-            else if(command.startsWith("OPTS")){
+            else if(commandName.startsWith("OPTS")){
                 this.handleOpts();
+            }
+            else if(commandName.startsWith("EPRT")){
+                String arg = command[1];
+                this.handleEprt(arg);
             }
         }
     }
 
+    public void handleEprt(String eprtArgument) throws IOException{
+        //creation d'une connexion vers le client TODO: à externaliser
+        String[] parts = eprtArgument.split("\\|");
+        String clientHostName = parts[2];
+        InetAddress address = Inet6Address.getByName(clientHostName);
+        int clientPort = Integer.parseInt(parts[3]);
+        Socket dataSocket = new Socket(address, clientPort);
+        this.writeToClient("200 Ready to transfer data\n");
+    }
     public void handleOpts(){
         writeToClient("200 SP opts good\n");
     }

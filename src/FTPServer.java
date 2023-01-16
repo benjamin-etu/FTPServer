@@ -1,17 +1,24 @@
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.Inet6Address;
-import java.net.InetAddress;
+import java.net.UnknownHostException;
+
+import javax.xml.crypto.Data;
 
 public class FTPServer{
 
     private int port;
     private ServerSocket serverSocket;
     private Socket clientSocket;
+    private Socket dataSocket;
+    private DataOutputStream dataSocketOutputStream;
     private BufferedReader inFromClient;
     private DataOutputStream outToClient;
     private final String USERNAME = "ben";
@@ -55,11 +62,13 @@ public class FTPServer{
 
     /*
      * Read a command and return a list of two elements.
-     * First element is the command name. Second element is the argument given with this command.
+     * First element is the command name. Second element is the argument given with this command if
+     * exists.
      */
     public String[] readCommand() throws IOException{
         String command = inFromClient.readLine();
         System.out.println(command);
+        //sépare le nom de la commande de l'argument
         return command.split(" ");
     }
 
@@ -83,6 +92,10 @@ public class FTPServer{
                         this.handlePass();
                     }else{
                         writeToClient("ERROR login\n");
+                        this.outToClient.close();
+                        this.inFromClient.close();
+                        this.clientSocket.close();
+                        stop = true;
                     }
                 }
             }
@@ -106,17 +119,51 @@ public class FTPServer{
                 String arg = command[1];
                 this.handleEprt(arg);
             }
+            else if(commandName.equals("RETR")){
+                String fileToRetrieve = command[1];
+                this.handleRetr(fileToRetrieve, this.dataSocketOutputStream);
+            }
         }
     }
 
+    public void openDataConnection(String address, int port) throws UnknownHostException, IOException{
+        this.dataSocket = new Socket(address, port);
+        this.dataSocketOutputStream = new DataOutputStream(this.dataSocket.getOutputStream());
+    }
+
+    public void handleRetr(String fileToRetrieve, DataOutputStream dataStream) throws IOException, FileNotFoundException{
+        // Ouvre un flux d'entrée pour lire le fichier
+        // Le fichier d'entrée
+        File file = new File(fileToRetrieve);    
+        // Créer l'objet File Reader
+        FileReader fr = new FileReader(file);  
+        // Créer l'objet BufferedReader        
+        BufferedReader br = new BufferedReader(fr);  
+        StringBuffer sb = new StringBuffer();    
+        String line;
+        while((line = br.readLine()) != null)
+        {
+            // ajoute la ligne au buffer
+            sb.append(line);      
+            sb.append("\n");     
+        }   
+        dataStream.writeBytes(sb.toString());
+        this.writeToClient("125 File downloaded\n");
+        dataStream.close();
+        fr.close();
+        this.dataSocket.close();
+    }
+
     public void handleEprt(String eprtArgument) throws IOException{
-        //creation d'une connexion vers le client TODO: à externaliser
         String[] parts = eprtArgument.split("\\|");
-        String clientHostName = parts[2];
-        InetAddress address = Inet6Address.getByName(clientHostName);
-        int clientPort = Integer.parseInt(parts[3]);
-        Socket dataSocket = new Socket(address, clientPort);
-        this.writeToClient("200 Ready to transfer data\n");
+        try{
+            String address = parts[2];
+            int port = Integer.parseInt(parts[3]);
+            this.openDataConnection(address, port);
+            this.writeToClient("200 Ready to transfer data\n");
+        }catch(Exception e){
+            this.writeToClient("500 Error on creating socket to transfer data");
+        }
     }
     public void handleOpts(){
         writeToClient("200 SP opts good\n");

@@ -140,20 +140,21 @@ public class FTPServer{
             BufferedReader br = new BufferedReader(fr);  
             StringBuffer sb = new StringBuffer();    
             String line;
+            writeToClient("150 Downloading file\n");
             while((line = br.readLine()) != null)
             {
                 // ajoute la ligne au buffer
                 sb.append(line);      
                 sb.append("\n");     
             }   
+            writeToClient("226 Successfully downloaded\n");
             dataStream.writeBytes(sb.toString());
-            this.writeToClient("150 File downloaded\n");
             dataStream.close();
             fr.close();
             this.dataSocket.close();
         }catch(IOException e){
             e.printStackTrace();
-            writeToClient("550 Reading file throw an error\n");
+            writeToClient("451 Reading file throw an error\n");
         }
     }
 

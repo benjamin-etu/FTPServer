@@ -1,7 +1,6 @@
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
@@ -10,7 +9,6 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
-import javax.xml.crypto.Data;
 
 public class FTPServer{
 
@@ -131,27 +129,32 @@ public class FTPServer{
         this.dataSocketOutputStream = new DataOutputStream(this.dataSocket.getOutputStream());
     }
 
-    public void handleRetr(String fileToRetrieve, DataOutputStream dataStream) throws IOException, FileNotFoundException{
-        // Ouvre un flux d'entrée pour lire le fichier
-        // Le fichier d'entrée
-        File file = new File(fileToRetrieve);    
-        // Créer l'objet File Reader
-        FileReader fr = new FileReader(file);  
-        // Créer l'objet BufferedReader        
-        BufferedReader br = new BufferedReader(fr);  
-        StringBuffer sb = new StringBuffer();    
-        String line;
-        while((line = br.readLine()) != null)
-        {
-            // ajoute la ligne au buffer
-            sb.append(line);      
-            sb.append("\n");     
-        }   
-        dataStream.writeBytes(sb.toString());
-        this.writeToClient("125 File downloaded\n");
-        dataStream.close();
-        fr.close();
-        this.dataSocket.close();
+    public void handleRetr(String fileToRetrieve, DataOutputStream dataStream){
+        try{
+            // Ouvre un flux d'entrée pour lire le fichier
+            // Le fichier d'entrée
+            File file = new File(fileToRetrieve);    
+            // Créer l'objet File Reader
+            FileReader fr = new FileReader(file);  
+            // Créer l'objet BufferedReader        
+            BufferedReader br = new BufferedReader(fr);  
+            StringBuffer sb = new StringBuffer();    
+            String line;
+            while((line = br.readLine()) != null)
+            {
+                // ajoute la ligne au buffer
+                sb.append(line);      
+                sb.append("\n");     
+            }   
+            dataStream.writeBytes(sb.toString());
+            this.writeToClient("150 File downloaded\n");
+            dataStream.close();
+            fr.close();
+            this.dataSocket.close();
+        }catch(IOException e){
+            e.printStackTrace();
+            writeToClient("550 Reading file throw an error\n");
+        }
     }
 
     public void handleEprt(String eprtArgument) throws IOException{

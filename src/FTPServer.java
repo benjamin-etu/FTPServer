@@ -2,6 +2,7 @@ import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -138,7 +139,23 @@ public class FTPServer{
     }
 
     public void handleStor(String filenameToStore, BufferedReader dataInputStream ){
-
+        writeToClient("150 Start receiving data ...\n");
+        //récupère les données du fichier 
+        try{
+            String fileContent = dataInputStream.readLine();
+            //écrire le fichier sur le serveur 
+            FileOutputStream fos = new FileOutputStream(filenameToStore);
+            fos.write(fileContent.getBytes());
+            fos.flush();
+            fos.close();
+            //envoi message que tout est ok
+            writeToClient("226 File successfully stored.\n");
+            dataInputStream.close();
+            this.dataSocket.close();
+        }catch(Exception e){
+            e.printStackTrace();
+            writeToClient("451 Error.\n ");
+        }
     }
 
     public void handleRetr(String fileToRetrieve, DataOutputStream dataStream){

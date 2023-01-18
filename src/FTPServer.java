@@ -15,10 +15,13 @@ public class FTPServer{
     private int port;
     private ServerSocket serverSocket;
     private Socket clientSocket;
-    private Socket dataSocket;
-    private DataOutputStream dataSocketOutputStream;
     private BufferedReader inFromClient;
     private DataOutputStream outToClient;
+
+    private Socket dataSocket;
+    private DataOutputStream dataSocketOutputStream;
+    private BufferedReader dataSocketBufferedReader; 
+
     private final String USERNAME = "ben";
     private final String PASSWORD = "ben";
 
@@ -121,12 +124,21 @@ public class FTPServer{
                 String fileToRetrieve = command[1];
                 this.handleRetr(fileToRetrieve, this.dataSocketOutputStream);
             }
+            else if(commandName.equals("STOR")){
+                String filenameToStore = command[1];
+                this.handleStor(filenameToStore, this.dataSocketBufferedReader );
+            }
         }
     }
 
     public void openDataConnection(String address, int port) throws UnknownHostException, IOException{
         this.dataSocket = new Socket(address, port);
         this.dataSocketOutputStream = new DataOutputStream(this.dataSocket.getOutputStream());
+        this.dataSocketBufferedReader = new BufferedReader(new InputStreamReader(this.dataSocket.getInputStream()));
+    }
+
+    public void handleStor(String filenameToStore, BufferedReader dataInputStream ){
+
     }
 
     public void handleRetr(String fileToRetrieve, DataOutputStream dataStream){
@@ -164,11 +176,12 @@ public class FTPServer{
             String address = parts[2];
             int port = Integer.parseInt(parts[3]);
             this.openDataConnection(address, port);
-            this.writeToClient("200 Ready to transfer data\n");
+            writeToClient("200 Ready to transfer data\n");
         }catch(Exception e){
-            this.writeToClient("500 Error on creating socket to transfer data");
+            writeToClient("500 Error on creating socket to transfer data\n");
         }
     }
+
     public void handleOpts(){
         writeToClient("200 SP opts good\n");
     }

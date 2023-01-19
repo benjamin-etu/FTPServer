@@ -1,6 +1,7 @@
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
@@ -162,26 +163,20 @@ public class FTPServer{
         try{
             // Ouvre un flux d'entrée pour lire le fichier
             // Le fichier d'entrée
+            writeToClient("150 Sending...\n");
             File file = new File(fileToRetrieve);    
-            // Créer l'objet File Reader
-            FileReader fr = new FileReader(file);  
-            // Créer l'objet BufferedReader        
-            BufferedReader br = new BufferedReader(fr);  
-            StringBuffer sb = new StringBuffer();    
-            String line;
-            writeToClient("150 Downloading file\n");
-            while((line = br.readLine()) != null)
-            {
-                // ajoute la ligne au buffer
-                sb.append(line);      
-                sb.append("\n");     
-            }   
+            // Envoi du fichier au client
+            FileInputStream fileInputStream = new FileInputStream(file);
+            byte[] buffer = new byte[4096];
+            int bytesRead;
+            while ((bytesRead = fileInputStream.read(buffer)) != -1) {
+                dataStream.write(buffer, 0, bytesRead);
+            }
             writeToClient("226 Successfully downloaded\n");
-            dataStream.writeBytes(sb.toString());
             dataStream.close();
-            fr.close();
+            fileInputStream.close();
             this.dataSocket.close();
-        }catch(IOException e){
+        }catch(Exception e){
             e.printStackTrace();
             writeToClient("451 Reading file throw an error\n");
         }

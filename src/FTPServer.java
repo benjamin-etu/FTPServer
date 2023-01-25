@@ -2,20 +2,22 @@ import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 
 public class FTPServer{
 
     private int port;
     private ServerSocket serverSocket;
+    private Path serverPath;
     private Socket clientSocket;
     private BufferedReader inFromClient;
     private DataOutputStream outToClient;
@@ -27,9 +29,14 @@ public class FTPServer{
     private final String USERNAME = "ben";
     private final String PASSWORD = "ben";
 
+    private User connectedUser;
+    private Path currentDir;
+
     public FTPServer(int port) throws IOException{
         this.port = port;
         this.serverSocket = new ServerSocket(this.port);
+        this.serverPath = Paths.get("C:","Users","Ben","Documents" );
+       
     }
 
     /*
@@ -91,15 +98,7 @@ public class FTPServer{
                 commandName = command[0];
                 String password = command[1];
                 if (commandName.startsWith("PASS")){
-                    if (username.equals(this.USERNAME) && password.equals(this.PASSWORD)){
-                        this.handlePass();
-                    }else{
-                        writeToClient("ERROR login\n");
-                        this.outToClient.close();
-                        this.inFromClient.close();
-                        this.clientSocket.close();
-                        stop = true;
-                    }
+                    stop = !(this.handlePass(username, password));
                 }
             }
     
@@ -130,7 +129,32 @@ public class FTPServer{
                 String filenameToStore = command[1];
                 this.handleStor(filenameToStore, this.dataSocketBufferedReader );
             }
+            else if(commandName.equals("CWD")){
+                String directoryName = command[1];
+                this.handleCwd(directoryName);
+            }
         }
+    }
+
+    private void handleCwd(String directoryName) throws IOException {
+        //on regarde si le currentDir existe dans le user homedir
+        String userHomeDir = this.connectedUser.getHomeDir().toString();
+        Path p = Paths.get(this.serverPath.toString(), userHomeDir, directoryName);
+        if (Files.exists(p) && Files.isDirectory(p)) {
+            // Le dossier existe
+            //on ajoute directoryName à currentDir
+            this.currentDir = p;
+        } else {
+            // Le dossier n'existe pas
+            //on le crée
+            Files.createDirectory(p);
+            //on ajoute directoryName à currentDir
+            this.currentDir = p;
+            
+        }
+        writeToClient("250 Okay.\n");
+        System.out.print("current dir :"+this.currentDir);
+
     }
 
     public void openDataConnection(String address, int port) throws UnknownHostException, IOException{
@@ -202,8 +226,19 @@ public class FTPServer{
         writeToClient("331 User name ok, need password\n");
     }
 
-    public void handlePass(){
-        writeToClient("230 User logged in\n");
+    public boolean handlePass(String username, String password) throws IOException{
+        if (username.equals(this.USERNAME) && password.equals(this.PASSWORD)){
+            writeToClient("230 User logged in\n");
+            this.connectedUser = new User(username);
+            this.currentDir = this.connectedUser.getHomeDir();
+            return true;
+        }else{
+            writeToClient("ERROR login\n");
+            this.outToClient.close();
+            this.inFromClient.close();
+            this.clientSocket.close();
+            return false;
+        }
     }
 
     /*

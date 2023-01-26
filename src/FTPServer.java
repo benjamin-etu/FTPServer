@@ -35,7 +35,6 @@ public class FTPServer{
     public FTPServer(int port) throws IOException{
         this.port = port;
         this.serverSocket = new ServerSocket(this.port);
-        this.serverPath = Paths.get("C:","Users","Ben","Documents" );
        
     }
 
@@ -139,7 +138,8 @@ public class FTPServer{
     private void handleCwd(String directoryName) throws IOException {
         //on regarde si le currentDir existe dans le user homedir
         String userHomeDir = this.connectedUser.getHomeDir().toString();
-        Path p = Paths.get(this.serverPath.toString(), userHomeDir, directoryName);
+        Path p = Paths.get(userHomeDir, directoryName);
+        System.out.print(p.toString());
         if (Files.exists(p) && Files.isDirectory(p)) {
             // Le dossier existe
             //on ajoute directoryName à currentDir
@@ -147,7 +147,7 @@ public class FTPServer{
         } else {
             // Le dossier n'existe pas
             //on le crée
-            Files.createDirectory(p);
+            Files.createDirectory(p.toAbsolutePath());
             //on ajoute directoryName à currentDir
             this.currentDir = p;
             
@@ -230,7 +230,19 @@ public class FTPServer{
         if (username.equals(this.USERNAME) && password.equals(this.PASSWORD)){
             writeToClient("230 User logged in\n");
             this.connectedUser = new User(username);
-            this.currentDir = this.connectedUser.getHomeDir();
+            Path p = this.connectedUser.getHomeDir();
+            if (Files.exists(p) && Files.isDirectory(p)) {
+                // Le dossier existe
+                //on ajoute directoryName à currentDir
+                this.currentDir = p;
+            } else {
+                // Le dossier n'existe pas
+                //on le crée
+                Files.createDirectory(p.toAbsolutePath());
+                //on ajoute directoryName à currentDir
+                this.currentDir = p;
+                
+            }
             return true;
         }else{
             writeToClient("ERROR login\n");

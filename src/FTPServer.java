@@ -136,21 +136,26 @@ public class FTPServer{
     }
 
     private void handleCwd(String directoryName) throws IOException {
-        //on regarde si le currentDir existe dans le user homedir
-        String userHomeDir = this.connectedUser.getHomeDir().toString();
-        Path p = Paths.get(userHomeDir, directoryName);
-        System.out.print(p.toString());
-        if (Files.exists(p) && Files.isDirectory(p)) {
-            // Le dossier existe
-            //on ajoute directoryName à currentDir
-            this.currentDir = p;
-        } else {
-            // Le dossier n'existe pas
-            //on le crée
-            Files.createDirectory(p.toAbsolutePath());
-            //on ajoute directoryName à currentDir
-            this.currentDir = p;
-            
+        if (directoryName.equals("..")){
+            //si le répértoire courant n'est pas égal au home dir du user, pour éviter de remonter plus haut
+            if(this.currentDir.toString().equals(this.connectedUser.getHomeDir().toString()) == false ){
+                this.currentDir = this.currentDir.getParent();
+            }
+
+        }else{
+            Path p = Paths.get(this.currentDir.toString(), directoryName);
+            System.out.print(p.toString());
+            if (Files.exists(p) && Files.isDirectory(p)) {
+                // Le dossier existe
+                //on ajoute directoryName à currentDir
+                this.currentDir = p;
+            }else{
+                // Le dossier n'existe pas
+                //on le crée
+                Files.createDirectory(p.toAbsolutePath());
+                //on ajoute directoryName à currentDir
+                this.currentDir = p;
+            }
         }
         writeToClient("250 Okay.\n");
         System.out.print("current dir :"+this.currentDir);
@@ -169,7 +174,8 @@ public class FTPServer{
         try{
             String fileContent = dataInputStream.readLine();
             //écrire le fichier sur le serveur 
-            FileOutputStream fos = new FileOutputStream(filenameToStore);
+            Path p = Paths.get(this.currentDir.toString(), filenameToStore);
+            FileOutputStream fos = new FileOutputStream(p.toAbsolutePath().toString());
             fos.write(fileContent.getBytes());
             fos.flush();
             fos.close();
@@ -188,7 +194,8 @@ public class FTPServer{
             // Ouvre un flux d'entrée pour lire le fichier
             // Le fichier d'entrée
             writeToClient("150 Sending...\n");
-            File file = new File(fileToRetrieve);    
+            Path p = Paths.get(this.currentDir.toString(), fileToRetrieve);
+            File file = new File(p.toString());    
             // Envoi du fichier au client
             FileInputStream fileInputStream = new FileInputStream(file);
             byte[] buffer = new byte[4096];

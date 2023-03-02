@@ -19,6 +19,21 @@
 	</properties>
 	<dependencies>
 	<dependency>
+   <groupId>org.springframework.security</groupId>
+   <artifactId>spring-security-crypto</artifactId>
+   <version>6.0.2</version>
+</dependency>
+<dependency>
+   <groupId>commons-logging</groupId>
+   <artifactId>commons-logging</artifactId>
+   <version>1.2</version>
+</dependency>
+<dependency>
+   <groupId>org.bouncycastle</groupId>
+   <artifactId>bcpkix-jdk15on</artifactId>
+   <version>1.70</version>
+</dependency>
+	<dependency>
             <groupId>org.apache.tomcat.embed</groupId>
             <artifactId>tomcat-embed-jasper</artifactId>
             <scope>provided</scope>

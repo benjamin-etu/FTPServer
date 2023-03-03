@@ -1,17 +1,25 @@
 package com.example.app.model;
 
+import java.util.List;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 
 @Entity
 public class Etudiant {
+    @Id
+    @GeneratedValue
     private long id;
     private String email;
     private String nom;
     private String prenom;
     private String mdp;
     private boolean online;
+
+    @OneToMany
+    private List<FeuillePresence> feuillesPresences;
 
     public Etudiant() {
     }
@@ -24,8 +32,6 @@ public class Etudiant {
         this.online = false;
     }
 
-    @Id
-    @GeneratedValue
     public long getId() {
         return id;
     }
@@ -72,6 +78,18 @@ public class Etudiant {
 
     public void setOnline(boolean p) {
         this.online = p;
+    }
+
+    public List<FeuillePresence> getFeuillesPresences() {
+        return this.feuillesPresences;
+    }
+
+    public void addFeuillePresence(FeuillePresence fp) {
+        this.feuillesPresences.add(fp);
+    }
+
+    public void removeFeuillePresence(FeuillePresence fp) {
+        this.feuillesPresences.remove(fp);
     }
 
 }

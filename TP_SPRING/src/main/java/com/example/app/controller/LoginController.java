@@ -51,6 +51,7 @@ public class LoginController {
                 etu.setOnline(true);
                 er.save(etu);
                 session.setAttribute("etu", etu);
+
             }
             status_message = "Tu es bien connecté, bravo";
 

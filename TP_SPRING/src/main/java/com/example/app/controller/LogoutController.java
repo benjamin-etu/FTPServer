@@ -21,6 +21,7 @@ public class LogoutController {
         Etudiant etu = (Etudiant) session.getAttribute("etu");
         if (etu != null) {
             etu.setOnline(false);
+            session.removeAttribute("etu");
             er.save(etu);
         }
         return "redirect:/index";

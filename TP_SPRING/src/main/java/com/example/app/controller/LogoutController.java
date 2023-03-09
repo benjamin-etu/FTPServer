@@ -2,11 +2,9 @@ package com.example.app.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import com.example.app.model.Etudiant;
-import com.example.app.model.EtudiantRepository;
+import com.example.app.service.EtudiantService;
 
 import jakarta.servlet.http.HttpSession;
 
@@ -14,16 +12,11 @@ import jakarta.servlet.http.HttpSession;
 public class LogoutController {
 
     @Autowired
-    private EtudiantRepository er;
+    private EtudiantService es;
 
     @RequestMapping("/logout")
     public String logout(HttpSession session) {
-        Etudiant etu = (Etudiant) session.getAttribute("etu");
-        if (etu != null) {
-            etu.setOnline(false);
-            session.removeAttribute("etu");
-            er.save(etu);
-        }
+        es.logout(session);
         return "redirect:/index";
     }
 }

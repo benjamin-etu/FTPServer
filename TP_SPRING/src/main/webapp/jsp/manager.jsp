@@ -9,6 +9,10 @@
         font-family: "Montserrat", sans-serif;
         margin: 0;
         padding: 0;
+        background-image: url('https://blog.flatchr.io/hs-fs/hubfs/%C3%A9tudiante.png?width=2240&name=%C3%A9tudiante.png');
+        background-size: cover;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
       }
 
       h1, h3 {

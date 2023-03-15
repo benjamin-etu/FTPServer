@@ -19,7 +19,7 @@ public class FeuillePresence {
     private int annee;
     private int mois;
 
-    @OneToMany
+    @OneToMany(mappedBy = "feuillePresence", fetch = FetchType.EAGER)
     private List<LignePresence> lignesPresences;
 
     @ManyToOne

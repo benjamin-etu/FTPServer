@@ -4,105 +4,130 @@
   <head>
     <meta charset="UTF-8">
     <title>Manager</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@300&display=swap" rel="stylesheet">
     <style>
-      body {
-        font-family: "Montserrat", sans-serif;
-        margin: 0;
-        padding: 0;
-        background-image: url('https://blog.flatchr.io/hs-fs/hubfs/%C3%A9tudiante.png?width=2240&name=%C3%A9tudiante.png');
-        background-size: cover;
-        background-repeat: no-repeat;
-        background-attachment: fixed;
-      }
 
-      h1, h3 {
-        text-align: center;
-      }
+body {
+      background-color: #f2f2f2;
+      font-family: 'Oswald', sans-serif;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto;
+    }
+   
+   #block {
+  background-color: #f7f7f7;
+  padding: 20px;
+  margin: 10%;
+  border-radius: 10px;
+  width: 80%;
+}
 
-      form {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        margin: 20px 0;
-      }
+h1 {
+  font-size: 3em;
+  color: #3f51b5;
+  margin-top: 2em;
+  margin-bottom: 1em;
+}
 
-      label {
-        font-weight: bold;
-        margin-right: 10px;
-      }
+h3 {
+  font-size: 1.5em;
+  color: #3f51b5;
+  margin-top: 2em;
+  margin-bottom: 1em;
+}
 
-      input[type="number"] {
-        padding: 5px;
-        margin-bottom: 10px;
-        border-radius: 5px;
-        border: 1px solid #ccc;
-        width: 100px;
-      }
+form {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin-top: 2em;
+}
 
-      input[type="submit"] {
-        background-color: #007bff;
-        color: #fff;
-        border: none;
-        border-radius: 5px;
-        padding: 10px 20px;
-        cursor: pointer;
-        font-size: 16px;
-        margin-top: 10px;
-      }
+label {
+  font-size: 1.2em;
+  margin-bottom: 0.5em;
+}
 
-      table {
-        border-collapse: collapse;
-        margin: 20px auto;
-        font-size: 16px;
-      }
+input[type="number"] {
+  width: 50%;
+  padding: 10px;
+  margin-bottom: 1em;
+  border: none;
+  border-radius: 5px;
+}
 
-      th, td {
-        border: 1px solid #ccc;
-        padding: 10px;
-        text-align: center;
-      }
+input[type="submit"] {
+  color: #fff;
+  background-color: #3f51b5;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  margin-top: 1em;
+  cursor: pointer;
+}
 
-      th {
-        background-color: #007bff;
-        color: #fff;
-        font-weight: bold;
-      }
+table {
+  width: 100%;
+  margin-top: 2em;
+  border-collapse: collapse;
+}
 
-      tr:nth-child(even) {
-        background-color: #f2f2f2;
-      }
+th, td {
+  padding: 10px;
+  border: 1px solid #ddd;
+  text-align: center;
+}
 
-      a {
-        color: #007bff;
-        text-decoration: none;
-        margin-right: 10px;
-      }
+th {
+  background-color: #f7f7f7;
+  font-size: 1.2em;
+  color: #3f51b5;
+}
 
-      a:hover {
-        text-decoration: underline;
-      }
-    </style>
+a {
+  color: #555;
+  background-color: #ddd;
+  padding: 10px 20px;
+  text-decoration: none;
+  border-radius: 5px;
+  display: block;
+}
+
+a:hover {
+  background-color: #aaa;
+}
+</style>
+
+
   </head>
   <body>
-    <h1>Manager</h1>
-    <h3>Creer une nouvelle feuille</h3>
-    <form action="/manager/create" method="post">
-        <label for="annee">Annee :</label>
-        <input min="0" type="number" id="annee" name="annee" required><br><br>
-        <label for="mois">Mois :</label>
-        <input min="1" max="12" type="number" valueid="mois" name="mois" required><br><br>
-        <input type="submit" value="Creer">
-    </form>
-    <h3>Vos fiches</h3>
-    <table>
-      <thead><th>Actions</th><th>Mois</th><th>Annee</th></thead>
-      <% for (FeuillePresence fp : (List<FeuillePresence>) request.getAttribute("feuilles")) { %>
-          <tr>
-              <td><a href="/manager/feuille/<%= fp.getId() %>">Afficher</a>/<a href="/manager/delete/feuille/<%= fp.getId() %>">Supprimer</a></td>
-              <td><%= fp.getMois() %></td>
-              <td><%= fp.getAnnee() %></td>
-          </tr>
-      <% } %>
-  </table>
+    <div id="block">
+      <h1>Manager</h1>
+      <h3>Creer une nouvelle feuille</h3>
+      <form action="/manager/create" method="post">
+          <label for="annee">Annee :</label>
+          <input min="0" type="number" id="annee" name="annee" required><br><br>
+          <label for="mois">Mois :</label>
+          <input min="1" max="12" type="number" valueid="mois" name="mois" required><br><br>
+          <input type="submit" value="Creer">
+      </form>
+      <h3>Vos fiches</h3>
+      <table>
+        <thead><th>Actions</th><th>Mois</th><th>Annee</th></thead>
+        <% for (FeuillePresence fp : (List<FeuillePresence>) request.getAttribute("feuilles")) { %>
+            <tr>
+                <td><a href="/manager/feuille/<%= fp.getId() %>">Afficher</a>/<a href="/manager/delete/feuille/<%= fp.getId() %>"> Supprimer</a></td>
+                <td><%= fp.getMois() %></td>
+                <td><%= fp.getAnnee() %></td>
+            </tr>
+        <% } %>
+      </table>
+    </div>
   </body>
 </html>

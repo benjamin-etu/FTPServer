@@ -11,6 +11,8 @@ import com.example.app.model.Etudiant;
 import com.example.app.model.EtudiantRepository;
 import com.example.app.model.FeuillePresence;
 import com.example.app.model.FeuillePresenceRepository;
+import com.example.app.model.LignePresence;
+import com.example.app.model.LignePresenceRepository;
 
 import jakarta.servlet.http.HttpSession;
 
@@ -19,6 +21,8 @@ public class FeuillePresenceService {
 
     @Autowired
     private FeuillePresenceRepository fpr;
+    @Autowired 
+    private LignePresenceRepository lpr;
     @Autowired
     private EtudiantRepository er;
 
@@ -40,8 +44,29 @@ public class FeuillePresenceService {
         fpr.deleteById(id);
     }
 
-    public Optional<FeuillePresence> getFeuillePresenceById(long id) {
+    public FeuillePresence getFeuillePresenceById(long id) {
         return fpr.findById(id);
+    }
+
+    public void createLigne(long id, int jour, String hd, String hf, String subject, String teacher) {
+        //si la feuille existe
+        FeuillePresence fp = fpr.findById(id);
+        if (fp != null){
+            //on crée une ligne
+            LignePresence lp = new LignePresence
+            (
+                jour, hd, hf, subject, teacher
+            );
+            lp.setFeuillePresence(fp);
+            lpr.save(lp);
+            fp.addLignePresence(lp);
+            fpr.save(fp);
+        }
+
+    }
+
+    public void deleteLigne(long id) {
+        lpr.deleteById(id);
     }
 
 }

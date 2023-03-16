@@ -20,7 +20,7 @@ public class Etudiant {
     private String mdp;
     private boolean online;
 
-    @OneToMany
+    @OneToMany(mappedBy = "etudiant", fetch = FetchType.EAGER)
     private List<FeuillePresence> feuillesPresences;
 
     public Etudiant() {

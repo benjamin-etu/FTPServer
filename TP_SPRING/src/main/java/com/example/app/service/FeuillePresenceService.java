@@ -21,7 +21,7 @@ public class FeuillePresenceService {
 
     @Autowired
     private FeuillePresenceRepository fpr;
-    @Autowired 
+    @Autowired
     private LignePresenceRepository lpr;
     @Autowired
     private EtudiantRepository er;
@@ -29,7 +29,7 @@ public class FeuillePresenceService {
     public void createFeuille(int annee, int mois, HttpSession session) {
         Etudiant owner = (Etudiant) session.getAttribute("etu");
         // check si la feuille n'existe pas
-        if (fpr.findByAnneeAndMois(annee, mois).isEmpty()) {
+        if (fpr.findByAnneeAndMoisAndEtudiant(annee, mois, owner).isEmpty()) {
             FeuillePresence fp = new FeuillePresence(annee, mois);
             fp.setEtudiant(owner);
             fpr.save(fp);
@@ -41,6 +41,12 @@ public class FeuillePresenceService {
     }
 
     public void deleteFeuille(long id) {
+        FeuillePresence fp = fpr.findById(id);
+        if (fp != null) {
+            for (LignePresence lp : fp.getLignesPresences()) {
+                lpr.deleteById(lp.getId());
+            }
+        }
         fpr.deleteById(id);
     }
 
@@ -49,14 +55,12 @@ public class FeuillePresenceService {
     }
 
     public void createLigne(long id, int jour, String hd, String hf, String subject, String teacher) {
-        //si la feuille existe
+        // si la feuille existe
         FeuillePresence fp = fpr.findById(id);
-        if (fp != null){
-            //on crée une ligne
-            LignePresence lp = new LignePresence
-            (
-                jour, hd, hf, subject, teacher
-            );
+        if (fp != null) {
+            // on crée une ligne
+            LignePresence lp = new LignePresence(
+                    jour, hd, hf, subject, teacher);
             lp.setFeuillePresence(fp);
             lpr.save(lp);
             fp.addLignePresence(lp);
